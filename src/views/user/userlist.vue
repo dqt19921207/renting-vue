@@ -33,7 +33,8 @@
       <el-table-column label="操作">
         <template scope="scope">
           <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
+          <el-button type="danger" size="small" v-if="users.del==1" @click="handleDel(scope.$index, scope.row)">启用</el-button>
+          <el-button type="danger" size="small" v-else @click="handleDel(scope.$index, scope.row)">禁用</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -136,11 +137,10 @@ export default {
       //编辑界面数据
       editForm: {
         id: 0,
-        name: "",
-        sex: -1,
-        age: 0,
-        birth: "",
-        addr: ""
+        username: "",
+        password: "",
+        realname: "0",
+        tel: ""
       },
 
       addFormVisible: false, //新增界面是否显示
@@ -150,11 +150,11 @@ export default {
       },
       //新增界面数据
       addForm: {
-        name: "",
-        sex: -1,
-        age: 0,
-        birth: "",
-        addr: ""
+        id: 0,
+        username: "",
+        password: "",
+        realname: "0",
+        tel: ""
       }
     };
   },
@@ -162,6 +162,10 @@ export default {
     //禁用显示转换
     formatDel: function(row, column) {
       return row.del == 1 ? "禁用" : row.del == 0 ? "启用" : "未知";
+    },
+    //禁用显示转换1
+    formatDel1: function(row, column) {
+      return row.del == 0 ? "禁用" : row.del == 1 ? "启用" : "未知";
     },
     handleCurrentChange(val) {
       this.page = val;
@@ -215,7 +219,7 @@ export default {
       this.addForm = {
         username: "",
         password: "",
-        // realname: "",
+        realname: "",
         tel: ""
       };
     },

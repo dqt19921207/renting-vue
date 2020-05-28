@@ -8,7 +8,7 @@ export const getUserList = params => { return axios.post(`${base}/user/list`, pa
 
 export const getUserListPage = params => { return axios.post(`${base}/user/list`, params).then(res => res.data);};
 
-export const removeUser = params => { return axios.post(`${base}/user/remove`,  params).then(res => res.data);};
+export const removeUser = params => { return axios.post(`${base}/user/updateUser`,  params).then(res => res.data);};
 
 export const batchRemoveUser = params => { return axios.post(`${base}/user/batchremove`, params).then(res => res.data);};
 
