@@ -4,10 +4,10 @@
     <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
       <el-form :inline="true" :model="filters">
         <el-form-item>
-          <el-input v-model="filters.username" placeholder="登录号"></el-input>
+          <el-input v-model="filters.number" placeholder="门牌号"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" v-on:click="getUsers">查询</el-button>
+          <el-button type="primary" v-on:click="getBuildingList">查询</el-button>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleAdd">新增</el-button>
@@ -17,7 +17,7 @@
 
     <!--列表-->
     <el-table
-      :data="users"
+      :data="buildings"
       highlight-current-row
       v-loading="listLoading"
       @selection-change="selsChange"
@@ -25,16 +25,15 @@
     >
       <!-- <el-table-column type="selection"></el-table-column> -->
       <el-table-column type="index"></el-table-column>
-      <el-table-column prop="username" label="登录号"></el-table-column>
-      <el-table-column prop="realname" label="用户名"></el-table-column>
-      <el-table-column prop="tel" label="电话"></el-table-column>
-      <el-table-column prop="rolename" label="角色"></el-table-column>
-      <el-table-column prop="del" label="启用状态" :formatter="formatDel"></el-table-column>
+      <el-table-column prop="name" label="楼栋号"></el-table-column>
+      <el-table-column prop="number" label="门牌号"></el-table-column>
+      <el-table-column prop="elcFee" label="电费（元/度）"></el-table-column>
+      <el-table-column prop="watetFee" label="水费（元/吨）"></el-table-column>
+      <el-table-column prop="addr" label="地址" ></el-table-column>
       <el-table-column label="操作">
         <template scope="scope">
-          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button type="danger" size="small" v-if="scope.row.del==1" @click="handleDel(scope.$index, scope.row,0)">启用</el-button>
-          <el-button type="danger" size="small" v-else @click="handleDel(scope.$index, scope.row,1)">禁用</el-button>
+          <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button> 
+          <el-button type="danger" size="small"  @click="handleDel(scope.$index, scope.row,1)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -45,7 +44,7 @@
       <el-pagination
         layout="prev, pager, next"
         @current-change="handleCurrentChange"
-        :page-size="20"
+        :pageSize="10"
         :total="total"
         style="float:right;"
       ></el-pagination>
@@ -57,20 +56,26 @@
         <el-form-item label="id" hidden>
           <el-input v-model="editForm.id" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="登录号">
-          <el-input v-model="editForm.username" disabled auto-complete="off"></el-input>
+        <el-form-item label="userId" hidden>
+          <el-input v-model="editForm.userId" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="editForm.password"  auto-complete="off"></el-input>
+        <el-form-item label="楼栋号">
+          <el-input v-model="editForm.name"   auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="门牌号">
+          <el-input v-model="editForm.number"  auto-complete="off"></el-input>
         </el-form-item>
         <!-- <el-form-item label="重复密码">
           <el-input v-model="editForm.password1" type="password" auto-complete="off"></el-input> -->
         <!-- </el-form-item> -->
-        <el-form-item label="昵称">
-          <el-input v-model="editForm.realname" auto-complete="off"></el-input>
+        <el-form-item label="电费（元/度）">
+          <el-input v-model="editForm.elcFee" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="editForm.tel" auto-complete="off"></el-input>
+        <el-form-item label="水费（元/吨）">
+          <el-input v-model="editForm.watetFee" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="地址">
+          <el-input v-model="editForm.addr" auto-complete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -81,21 +86,27 @@
 
     <!--新增界面-->
     <el-dialog title="新增" v-model="addFormVisible" :close-on-click-modal="false">
-      <el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">
-        <el-form-item label="登录号">
-          <el-input v-model="addForm.username" auto-complete="off"></el-input>
+      <el-form :model="addForm" label-width="80px" :rules="addFormRules" ref="addForm">  
+        <el-form-item label="userId" hidden>
+          <el-input v-model="addForm.userId"    auto-complete="off"></el-input>
+        </el-form-item> 
+        <el-form-item label="楼栋号">
+          <el-input v-model="addForm.name"   auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="addForm.password"   auto-complete="off"></el-input>
+        <el-form-item label="门牌号">
+          <el-input v-model="addForm.number"  auto-complete="off"></el-input>
         </el-form-item>
         <!-- <el-form-item label="重复密码">
-          <el-input v-model="addForm.password1" type="password" auto-complete="off"></el-input> -->
+          <el-input v-model="editForm.password1" type="password" auto-complete="off"></el-input> -->
         <!-- </el-form-item> -->
-        <el-form-item label="昵称">
-          <el-input v-model="addForm.realname" auto-complete="off"></el-input>
+        <el-form-item label="电费（元/度）">
+          <el-input v-model="addForm.elcFee" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="电话">
-          <el-input v-model="addForm.tel" auto-complete="off"></el-input>
+        <el-form-item label="水费（元/吨）">
+          <el-input v-model="addForm.watetFee" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="地址">
+          <el-input v-model="addForm.addr" auto-complete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -108,13 +119,14 @@
 
 <script>
 import util from "../../common/js/util";
+let user=JSON.parse(sessionStorage.getItem('user'));
 //import NProgress from 'nprogress'
 import {
-  getUserListPage,
+  getBuildingList,
   removeUser,
   batchRemoveUser,
-  editUser,
-  addUser
+  editBuilding,
+  addBuilding
 } from "../../api/api";
 
 export default {
@@ -123,7 +135,7 @@ export default {
       filters: {
         name: ""
       },
-      users: [],
+      buildings: [],
       total: 0,
       page: 1,
       listLoading: false,
@@ -137,10 +149,13 @@ export default {
       //编辑界面数据
       editForm: {
         id: 0,
-        username: "",
-        password: "",
-        realname: "0",
-        tel: ""
+        name: "",
+        addr: "",
+        number: "0",
+        userId: 0,
+        watetFee:0,
+        elcFee:0,
+        del: 0
       },
 
       addFormVisible: false, //新增界面是否显示
@@ -151,10 +166,13 @@ export default {
       //新增界面数据
       addForm: {
         id: 0,
-        username: "",
-        password: "",
-        realname: "0",
-        tel: ""
+        name: "",
+        addr: "",
+        number: "0",
+        watetFee:0,
+        elcFee:0,
+        del: 0,
+        userId:user.id
       }
     };
   },
@@ -164,41 +182,40 @@ export default {
       return row.del == 1 ? "禁用" : row.del == 0 ? "启用" : "未知";
     }, 
     handleCurrentChange(val) {
-      this.page = val;
-      this.getUsers();
+      this.pageNum = val;
+      this.getBuildingList();
     },
-    //获取用户列表
-    getUsers() {
+    //获取 
+    getBuildingList() {
+       
       let para = {
         page: this.page,
-        username: this.filters.username
+        role:user.role,
+        userId:user.id
       };
       this.listLoading = true;
       //NProgress.start();
-      // console.log(para)
-      getUserListPage(para).then(res => {
+      console.log(para)
+      getBuildingList(para).then(res => {
         console.log(res)
         this.total = res.datas.total;
-        this.users = res.datas.list;
+        this.buildings = res.datas.list;
         this.listLoading = false;
       });
     },
     //删除
     handleDel: function(index, row ) {
         this.listLoading = true;
-          //NProgress.start();
-          var del=0;
-          if(row.del==0)
-            del=1;
-          let para = { id: row.id,del: del };
-          removeUser(para).then(res => {
+          //NProgress.start(); 
+          let para = { id: row.id,del: 1 };
+          editBuilding(para).then(res => {
             this.listLoading = false;
             //NProgress.done();
             this.$message({
               message: "删除成功",
               type: "success"
             });
-            this.getUsers();
+            this.getBuildingList();
           });
     },
     //显示编辑界面
@@ -209,11 +226,7 @@ export default {
     //显示新增界面
     handleAdd: function() {
       this.addFormVisible = true;
-      this.addForm = {
-        username: "",
-        password: "",
-        realname: "",
-        tel: ""
+      this.addForm = { 
       };
     },
     //编辑
@@ -224,7 +237,7 @@ export default {
             this.editLoading = true;
             //NProgress.start();
             let para = Object.assign({}, this.editForm); 
-            editUser(para).then(res => {
+            editBuilding(para).then(res => {
               this.editLoading = false;
               //NProgress.done();
               this.$message({
@@ -233,7 +246,7 @@ export default {
               });
               this.$refs["editForm"].resetFields();
               this.editFormVisible = false;
-              this.getUsers();
+              this.getBuildingList();
             });
           });
         }
@@ -246,13 +259,15 @@ export default {
           this.$confirm("确认提交吗？", "提示", {}).then(() => {
             this.addLoading = true;
             //NProgress.start();
+            this.addForm.userId=user.id
             let para = Object.assign({}, this.addForm);
+            
               console.log(para);
             // if (para.password != para.password1) {
             //   alert("两次密码输入不一致！");
             //   return;
             // }
-            addUser(para).then(res => {
+            addBuilding(para).then(res => {
               console.log(res);
               this.addLoading = false;
               //NProgress.done();
@@ -270,7 +285,7 @@ export default {
                 });
                 this.$refs["addForm"].resetFields();
                 this.addFormVisible = false;
-                this.getUsers();
+                this.getBuildingList();
               }
             });
           });
@@ -281,30 +296,31 @@ export default {
       this.sels = sels;
     },
     //批量删除
-    batchRemove: function() {
-      var ids = this.sels.map(item => item.id).toString();
-      this.$confirm("确认删除选中记录吗？", "提示", {
-        type: "warning"
-      })
-        .then(() => {
-          this.listLoading = true;
-          //NProgress.start();
-          let para = { ids: ids };
-          batchRemoveUser(para).then(res => {
-            this.listLoading = false;
-            //NProgress.done();
-            this.$message({
-              message: "删除成功",
-              type: "success"
-            });
-            this.getUsers();
-          });
-        })
-        .catch(() => {});
-    }
+    // batchRemove: function() {
+    //   var ids = this.sels.map(item => item.id).toString();
+    //   this.$confirm("确认删除选中记录吗？", "提示", {
+    //     type: "warning"
+    //   })
+    //     .then(() => {
+    //       this.listLoading = true;
+    //       //NProgress.start();
+    //       let para = { ids: ids };
+    //       batchRemoveUser(para).then(res => {
+    //         this.listLoading = false;
+    //         //NProgress.done();
+    //         this.$message({
+    //           message: "删除成功",
+    //           type: "success"
+    //         });
+    //         this.getBuildings();
+    //       });
+    //     })
+    //     .catch(() => {});
+    // }
   },
   mounted() {
-    this.getUsers();
+    this.getBuildingList();
+
   }
 };
 </script>

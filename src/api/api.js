@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 let base = 'http://localhost:8080';
 
 export const requestLogin = params => { return axios.post(`${base}/renting/login`, params).then(res => res.data); };
@@ -15,3 +16,11 @@ export const batchRemoveUser = params => { return axios.post(`${base}/user/batch
 export const editUser = params => { return axios.post(`${base}/user/updateUser`, params).then(res => res.data);};
 
 export const addUser = params => { return axios.post(`${base}/user/addUser`, params).then(res => res.data);};
+
+
+export const getBuildingList = params => { return axios.post(`${base}/building/list`, params).then(res => res.data);};
+
+
+export const editBuilding = params => { return axios.post(`${base}/building/updateBuilding`, params).then(res => res.data);};
+
+export const addBuilding = params => { return axios.post(`${base}/building/addBuilding`, params).then(res => res.data);};

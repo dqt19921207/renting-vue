@@ -11,6 +11,7 @@ import Page6 from './views/nav3/Page6.vue'
 import echarts from './views/charts/echarts.vue'
 
 import userlist from './views/user/userlist.vue'
+import buildinglist from './views/building/buildinglist.vue'
 
 let routes = [
     {
@@ -33,7 +34,16 @@ let routes = [
         name: '用户管理',
         iconCls: 'el-icon-message',//图标样式class
         children: [ 
-            { path: '/userlist', component: userlist, name: '用户列表' },
+            { path: '/userlist', component: userlist, name: '用户管理' },
+        ]
+    },
+    {
+        path: '/building',
+        component: Home,
+        name: '楼栋管理',
+        iconCls: 'el-icon-message',//图标样式class
+        children: [ 
+            { path: '/buildinglist', component: buildinglist, name: '楼栋管理' },
         ]
     },
     {
