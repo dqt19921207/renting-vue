@@ -23,7 +23,7 @@
       @selection-change="selsChange"
       style="width: 100%;"
     >
-      <!-- <el-table-column type="selection"></el-table-column> -->
+      <el-table-column type="selection"></el-table-column>
       <el-table-column type="index"></el-table-column>
       <el-table-column prop="username" label="登录号"></el-table-column>
       <el-table-column prop="realname" label="用户名"></el-table-column>
@@ -33,8 +33,7 @@
       <el-table-column label="操作">
         <template scope="scope">
           <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button type="danger" size="small" v-if="scope.row.del==1" @click="handleDel(scope.$index, scope.row,0)">启用</el-button>
-          <el-button type="danger" size="small" v-else @click="handleDel(scope.$index, scope.row,1)">禁用</el-button>
+          <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -65,7 +64,7 @@
         </el-form-item>
         <!-- <el-form-item label="重复密码">
           <el-input v-model="editForm.password1" type="password" auto-complete="off"></el-input> -->
-        <!-- </el-form-item> -->
+        </el-form-item>
         <el-form-item label="昵称">
           <el-input v-model="editForm.realname" auto-complete="off"></el-input>
         </el-form-item>
@@ -90,7 +89,7 @@
         </el-form-item>
         <!-- <el-form-item label="重复密码">
           <el-input v-model="addForm.password1" type="password" auto-complete="off"></el-input> -->
-        <!-- </el-form-item> -->
+        </el-form-item>
         <el-form-item label="昵称">
           <el-input v-model="addForm.realname" auto-complete="off"></el-input>
         </el-form-item>
@@ -137,10 +136,11 @@ export default {
       //编辑界面数据
       editForm: {
         id: 0,
-        username: "",
-        password: "",
-        realname: "0",
-        tel: ""
+        name: "",
+        sex: -1,
+        age: 0,
+        birth: "",
+        addr: ""
       },
 
       addFormVisible: false, //新增界面是否显示
@@ -150,11 +150,11 @@ export default {
       },
       //新增界面数据
       addForm: {
-        id: 0,
-        username: "",
-        password: "",
-        realname: "0",
-        tel: ""
+        name: "",
+        sex: -1,
+        age: 0,
+        birth: "",
+        addr: ""
       }
     };
   },
@@ -162,7 +162,7 @@ export default {
     //禁用显示转换
     formatDel: function(row, column) {
       return row.del == 1 ? "禁用" : row.del == 0 ? "启用" : "未知";
-    }, 
+    },
     handleCurrentChange(val) {
       this.page = val;
       this.getUsers();
@@ -184,13 +184,14 @@ export default {
       });
     },
     //删除
-    handleDel: function(index, row ) {
-        this.listLoading = true;
+    handleDel: function(index, row) {
+      this.$confirm("确认删除该记录吗?", "提示", {
+        type: "warning"
+      })
+        .then(() => {
+          this.listLoading = true;
           //NProgress.start();
-          var del=0;
-          if(row.del==0)
-            del=1;
-          let para = { id: row.id,del: del };
+          let para = { id: row.id };
           removeUser(para).then(res => {
             this.listLoading = false;
             //NProgress.done();
@@ -200,6 +201,8 @@ export default {
             });
             this.getUsers();
           });
+        })
+        .catch(() => {});
     },
     //显示编辑界面
     handleEdit: function(index, row) {
@@ -212,7 +215,7 @@ export default {
       this.addForm = {
         username: "",
         password: "",
-        realname: "",
+        // realname: "",
         tel: ""
       };
     },
@@ -223,7 +226,11 @@ export default {
           this.$confirm("确认提交吗？", "提示", {}).then(() => {
             this.editLoading = true;
             //NProgress.start();
-            let para = Object.assign({}, this.editForm); 
+            let para = Object.assign({}, this.editForm);
+            para.birth =
+              !para.birth || para.birth == ""
+                ? ""
+                : util.formatDate.format(new Date(para.birth), "yyyy-MM-dd");
             editUser(para).then(res => {
               this.editLoading = false;
               //NProgress.done();
